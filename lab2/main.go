@@ -1,69 +1,41 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"math"
+	"math/cmplx"
 )
 
-func main() {
-	reader := bufio.NewReader(os.Stdin)
+// DFT выполняет дискретное преобразование Фурье
+func DFT(input []complex128) []complex128 {
+	N := len(input)                 // Длина входного сигнала
+	output := make([]complex128, N) // Инициализация результата
 
-	var n int
-	var numbers []int64
-	fmt.Fscan(reader, &n)
-
-	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
+	for k := 0; k < N; k++ { // Перебор частотных компонент
+		var sum complex128
+		for n := 0; n < N; n++ { // Перебор временных отсчётов
+			angle := -2 * math.Pi * float64(k*n) / float64(N)
+			sum += input[n] * cmplx.Exp(complex(0, angle))
+		}
+		output[k] = sum
 	}
 
-	fmt.Println(numbers)
-
-	for true {
-		changed := false
-
-		for i := 0; i < n-1; i++ {
-			if numbers[i+1] < numbers[i] {
-				tmp := numbers[i]
-				numbers[i] = numbers[i+1]
-				numbers[i+1] = tmp
-				changed = true
-				fmt.Println(numbers)
-			}
-		}
-
-		if changed == false {
-			break
-		}
-	}
-
-	fmt.Println(numbers)
+	return output
 }
 
-// --- read from stdin ---
-// reader := bufio.NewReader(os.Stdin)
-// fmt.Fscan(reader, &a, &b)
-// fmt.Println(a + b)
+func main() {
+	// Пример входного сигнала
+	input := []complex128{
+		1 + 0i, 1 + 0i, 1 + 0i, 0 + 0i,
+		0 + 0i, 0 + 0i, 0 + 0i, 0 + 0i,
+	}
 
-// --- read from file ---
-// file, _ := os.Open("input.txt")
-// defer file.Close()
-// reader := bufio.NewReader(file)
-// fmt.Fscan(reader, &a, &b)
-// fmt.Println(a + b)
+	// Выполнение ДПФ
+	output := DFT(input)
 
-// --- write in file ---
-// file2, _ := os.Create("output.txt")
-// s := fmt.Sprintf("%f", inputdata)
-// file2.WriteString(s)
-
-// --- split string on symbol ---
-// strings.Split(string, symbol)
-
-// --- string to int64 ---
-// a, _ = strconv.ParseInt(string, 10, 64)
-
-// --- string to float64 ---
-// a, _ = strconv.ParseFloat(string, 64)
+	// Вывод результата
+	fmt.Println("Результат ДПФ:")
+	for k, value := range output {
+		fmt.Printf("X[%d] = %.3f + %.3fi\n", k, real(value), imag(value))
+	}
+}

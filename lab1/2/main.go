@@ -9,9 +9,9 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	var n int = 2
+	var n int
 	var numbers []int64
-	// fmt.Fscan(reader, &n)
+	fmt.Fscan(reader, &n)
 
 	for i := 0; i < n; i++ {
 		var tmp int64
@@ -19,15 +19,25 @@ func main() {
 		numbers = append(numbers, tmp)
 	}
 
-	result := numbers[1]
-	speed := int64(1500)
-	for i := int64(0); i < numbers[0]; i++ {
-		result = result * numbers[1]
-		time := result / speed / 60
-		fmt.Println(i+2, result, time, "m")
-	}
-
 	fmt.Println(numbers)
+
+	for true {
+		changed := false
+
+		for i := 0; i < n-1; i++ {
+			if numbers[i+1] < numbers[i] {
+				tmp := numbers[i]
+				numbers[i] = numbers[i+1]
+				numbers[i+1] = tmp
+				changed = true
+				fmt.Println(numbers)
+			}
+		}
+
+		if changed == false {
+			break
+		}
+	}
 
 	fmt.Println(numbers)
 }

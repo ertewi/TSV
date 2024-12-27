@@ -6,32 +6,12 @@ import (
 	"os"
 )
 
-func merge(left, right []int64) []int64 {
-	result := []int64{}
-	i, j := 0, 0
-
-	for i < len(left) && j < len(right) {
-		if left[i] < right[j] {
-			result = append(result, left[i])
-			i++
-		} else {
-			result = append(result, right[j])
-			j++
-		}
-	}
-
-	result = append(result, left[i:]...)
-	result = append(result, right[j:]...)
-
-	return result
-}
-
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	var n int
+	var n int = 2
 	var numbers []int64
-	fmt.Fscan(reader, &n)
+	// fmt.Fscan(reader, &n)
 
 	for i := 0; i < n; i++ {
 		var tmp int64
@@ -39,22 +19,15 @@ func main() {
 		numbers = append(numbers, tmp)
 	}
 
-	fmt.Println(numbers)
-
-	for k := 1; k < n; k *= 2 {
-		for start := 0; start < n; start += 2 * k {
-			mid := start + k
-			end := start + 2*k
-			if mid < n {
-				if end > n {
-					end = n
-				}
-				merged := merge(numbers[start:mid], numbers[mid:end])
-				copy(numbers[start:start+len(merged)], merged)
-				fmt.Println(numbers)
-			}
-		}
+	result := numbers[1]
+	speed := int64(1500)
+	for i := int64(0); i < numbers[0]; i++ {
+		result = result * numbers[1]
+		time := result / speed / 60
+		fmt.Println(i+2, result, time, "m")
 	}
+
+	fmt.Println(numbers)
 
 	fmt.Println(numbers)
 }
