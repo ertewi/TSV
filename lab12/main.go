@@ -1,35 +1,96 @@
 package main
 
 import (
-	"bufio"
+	"container/heap"
 	"fmt"
-	"os"
+	"math"
 )
 
+// Определение структуры для приоритетной очереди
+type Item struct {
+	node     int
+	distance int
+}
+
+type PriorityQueue []*Item
+
+func (pq PriorityQueue) Len() int { return len(pq) }
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].distance < pq[j].distance
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x interface{}) {
+	*pq = append(*pq, x.(*Item))
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	*pq = old[0 : n-1]
+	return item
+}
+
+// Алгоритм Дейкстры
+func dijkstra(graph map[int]map[int]int, start int) map[int]int {
+	// Инициализация расстояний
+	distances := make(map[int]int)
+	for node := range graph {
+		distances[node] = math.MaxInt64
+	}
+	distances[start] = 0
+
+	// Инициализация приоритетной очереди
+	pq := &PriorityQueue{}
+	heap.Init(pq)
+	heap.Push(pq, &Item{node: start, distance: 0})
+
+	// Основной цикл
+	for pq.Len() > 0 {
+		current := heap.Pop(pq).(*Item)
+		currentNode := current.node
+		currentDistance := current.distance
+
+		// Если расстояние уже оптимальное, пропускаем
+		if currentDistance > distances[currentNode] {
+			continue
+		}
+
+		// Обновляем соседей
+		for neighbor, cost := range graph[currentNode] {
+			newDistance := currentDistance + cost
+			if newDistance < distances[neighbor] {
+				distances[neighbor] = newDistance
+				heap.Push(pq, &Item{node: neighbor, distance: newDistance})
+			}
+		}
+	}
+
+	return distances
+}
+
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-
-	var n int = 2
-	var numbers []int64
-	// fmt.Fscan(reader, &n)
-
-	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
+	// Пример графа
+	graph := map[int]map[int]int{
+		0: {1: 4, 2: 1},
+		1: {3: 1},
+		2: {1: 2, 3: 5},
+		3: {},
 	}
 
-	result := numbers[1]
-	speed := int64(1500)
-	for i := int64(0); i < numbers[0]; i++ {
-		result = result * numbers[1]
-		time := result / speed / 60
-		fmt.Println(i+2, result, time, "m")
+	start := 0
+	distances := dijkstra(graph, start)
+
+	// Вывод результатов
+	fmt.Println("Кратчайшие расстояния от узла", start)
+	for node, distance := range distances {
+		fmt.Printf("До узла %d: %d\n", node, distance)
 	}
-
-	fmt.Println(numbers)
-
-	fmt.Println(numbers)
 }
 
 // --- read from stdin ---

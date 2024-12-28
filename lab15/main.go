@@ -1,35 +1,67 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"math"
 )
 
+// Функция для вычисления минимального числа операций для умножения матриц
+func calculateMinOperations(dimensions []int) ([][]int, [][]int) {
+	numMatrices := len(dimensions) - 1 // количество матриц
+	minOperations := make([][]int, numMatrices)
+	splitPoints := make([][]int, numMatrices)
+
+	// Инициализация таблиц
+	for i := range minOperations {
+		minOperations[i] = make([]int, numMatrices)
+		splitPoints[i] = make([]int, numMatrices)
+	}
+
+	// l - длина цепочки матриц, начиная с 2
+	for chainLength := 2; chainLength <= numMatrices; chainLength++ {
+		for start := 0; start <= numMatrices-chainLength; start++ {
+			end := start + chainLength - 1
+			minOperations[start][end] = math.MaxInt32 // инициализируем большим значением
+
+			// k - точка разбиения цепочки матриц на две подзадачи
+			for split := start; split < end; split++ {
+				operations := minOperations[start][split] +
+					minOperations[split+1][end] +
+					dimensions[start]*dimensions[split+1]*dimensions[end+1]
+
+				// Если текущее количество операций меньше предыдущего, обновляем минимальное значение
+				if operations < minOperations[start][end] {
+					minOperations[start][end] = operations
+					splitPoints[start][end] = split
+				}
+			}
+		}
+	}
+
+	return minOperations, splitPoints
+}
+
+// Функция для восстановления оптимального порядка умножения
+func getOptimalParenthesization(splitPoints [][]int, start, end int) string {
+	if start == end {
+		return fmt.Sprintf("A%d", start+1) // Одиночная матрица
+	} else {
+		left := getOptimalParenthesization(splitPoints, start, splitPoints[start][end])
+		right := getOptimalParenthesization(splitPoints, splitPoints[start][end]+1, end)
+		return fmt.Sprintf("(%s x %s)", left, right) // Возвращаем строку с расстановкой скобок
+	}
+}
+
 func main() {
-	reader := bufio.NewReader(os.Stdin)
+	// Пример использования
+	dimensions := []int{10, 20, 50, 1, 100} // Размерности матриц
+	minOperations, splitPoints := calculateMinOperations(dimensions)
 
-	var n int = 2
-	var numbers []int64
-	// fmt.Fscan(reader, &n)
+	optimalOrder := getOptimalParenthesization(splitPoints, 0, len(dimensions)-2)
+	minOperationsCount := minOperations[0][len(dimensions)-2]
 
-	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
-	}
-
-	result := numbers[1]
-	speed := int64(1500)
-	for i := int64(0); i < numbers[0]; i++ {
-		result = result * numbers[1]
-		time := result / speed / 60
-		fmt.Println(i+2, result, time, "m")
-	}
-
-	fmt.Println(numbers)
-
-	fmt.Println(numbers)
+	fmt.Printf("Минимальное количество операций: %d\n", minOperationsCount)
+	fmt.Printf("Оптимальный порядок умножения: %s\n", optimalOrder)
 }
 
 // --- read from stdin ---

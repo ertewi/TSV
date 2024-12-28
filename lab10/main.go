@@ -1,35 +1,56 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"math"
+	"strings"
 )
 
+// Функция Карацубы для умножения двух чисел
+func karatsuba(num1, num2 int) int {
+	// Базовый случай: если одно из чисел однозначное, возвращаем их произведение
+	if num1 < 10 || num2 < 10 {
+		return num1 * num2
+	}
+
+	// Преобразуем числа в строки для вычисления длины
+	len1 := int(math.Log10(float64(num1))) + 1
+	len2 := int(math.Log10(float64(num2))) + 1
+
+	// Определяем максимальную длину
+	length := int(math.Max(float64(len1), float64(len2)))
+
+	// Длина для деления числа пополам
+	halfLength := length / 2
+
+	// Разделяем числа на старшие и младшие разряды
+	high1 := num1 / int(math.Pow(10, float64(halfLength)))
+	low1 := num1 % int(math.Pow(10, float64(halfLength)))
+
+	high2 := num2 / int(math.Pow(10, float64(halfLength)))
+	low2 := num2 % int(math.Pow(10, float64(halfLength)))
+
+	// Рекурсивные вызовы Карацубы
+	zLow := karatsuba(low1, low2)
+	zHigh := karatsuba(high1, high2)
+	zCross := karatsuba(low1+high1, low2+high2)
+
+	// Комбинируем результат по формуле Карацубы
+	return zHigh*int(math.Pow(10, float64(2*halfLength))) +
+		(zCross-zHigh-zLow)*int(math.Pow(10, float64(halfLength))) +
+		zLow
+}
+
 func main() {
-	reader := bufio.NewReader(os.Stdin)
+	x := 15
+	y := 15
+	result := karatsuba(x, y)
 
-	var n int = 2
-	var numbers []int64
-	// fmt.Fscan(reader, &n)
-
-	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
-	}
-
-	result := numbers[1]
-	speed := int64(1500)
-	for i := int64(0); i < numbers[0]; i++ {
-		result = result * numbers[1]
-		time := result / speed / 60
-		fmt.Println(i+2, result, time, "m")
-	}
-
-	fmt.Println(numbers)
-
-	fmt.Println(numbers)
+	// Вывод результата
+	fmt.Printf("  %d\n", x)
+	fmt.Printf("x %d\n", y)
+	fmt.Println(strings.Repeat("-", int(math.Max(float64(len(fmt.Sprint(x))), float64(len(fmt.Sprint(y)))))+len(fmt.Sprint(result))))
+	fmt.Printf("  %d\n", result)
 }
 
 // --- read from stdin ---

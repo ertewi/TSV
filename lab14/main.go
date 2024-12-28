@@ -1,35 +1,46 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 )
 
-func main() {
-	reader := bufio.NewReader(os.Stdin)
+// Rukzak решает задачу о рюкзаке с использованием динамического программирования
+func Rukzak(M int, price map[string][]int) int {
+	// n - количество предметов
+	n := len(price["m"])
 
-	var n int = 2
-	var numbers []int64
-	// fmt.Fscan(reader, &n)
+	// dp - массив для хранения максимальных стоимостей для каждой массы от 0 до M
+	dp := make([]int, M+1)
 
+	// Проходим по всем предметам
 	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
+		// Обновляем массив dp в обратном порядке, чтобы избежать переиспользования обновленных значений
+		for j := M; j >= price["m"][i]; j-- {
+			dp[j] = max(dp[j], dp[j-price["m"][i]]+price["c"][i])
+		}
 	}
 
-	result := numbers[1]
-	speed := int64(1500)
-	for i := int64(0); i < numbers[0]; i++ {
-		result = result * numbers[1]
-		time := result / speed / 60
-		fmt.Println(i+2, result, time, "m")
+	// Возвращаем максимальную стоимость при данной грузоподъемности M
+	return dp[M]
+}
+
+// Функция для нахождения максимального числа из двух
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func main() {
+	// Пример данных
+	price := map[string][]int{
+		"m": {3, 5, 8},
+		"c": {8, 14, 23},
 	}
 
-	fmt.Println(numbers)
-
-	fmt.Println(numbers)
+	M := 15
+	fmt.Printf("Максимальная стоимость набора товаров при грузоподъемности %d: %d\n", M, Rukzak(M, price))
 }
 
 // --- read from stdin ---

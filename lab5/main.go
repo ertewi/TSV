@@ -1,25 +1,40 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 )
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
+	Array_A := [...]int{1, 2, 3}
+	Array_B := [...]int{4, 5, 6}
+	Na := len(Array_A)
+	Nb := len(Array_B)
+	Array_C := make([]int, Na+Nb)
 
-	var n int
-	var numbers []int64
-	fmt.Fscan(reader, &n)
-
-	for i := 0; i < n; i++ {
-		var tmp int64
-		fmt.Fscan(reader, &tmp)
-		numbers = append(numbers, tmp)
+	for i := 0; i < Na; i++ {
+		for j := 0; j < Nb; j++ {
+			Array_C[i+j+1] += Array_A[i] * Array_B[j]
+		}
 	}
 
-	fmt.Println(numbers)
+	for i := len(Array_C) - 1; i > 0; i-- {
+		if Array_C[i] >= 10 {
+			Array_C[i-1] += Array_C[i] / 10
+			Array_C[i] %= 10
+		}
+	}
+
+	k := 0
+	for k < len(Array_C) && Array_C[k] == 0 {
+		k++
+	}
+
+	if k == len(Array_C) {
+		fmt.Println("0")
+		return
+	}
+
+	fmt.Println(Array_C[k:])
 }
 
 // --- read from stdin ---
